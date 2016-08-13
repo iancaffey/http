@@ -17,18 +17,18 @@ import java.net.Socket;
  * @since 1.0
  */
 public class HttpServer implements AutoCloseable {
-    private final ServerSocket socket;
+    private final ServerSocket server;
 
     /**
      * Constructs a new {@code HttpServer} bound to a specified port.
      *
      * @param port the port to bind
-     * @throws IOException indicating an I/O error occurs when opening the socket
+     * @throws IOException indicating an I/O error occurs when opening the server
      */
     public HttpServer(int port) throws IOException {
         if (port < 0 || port > 65535)
             throw new IllegalArgumentException();
-        this.socket = new ServerSocket(port);
+        this.server = new ServerSocket(port);
     }
 
     /**
@@ -38,12 +38,12 @@ public class HttpServer implements AutoCloseable {
      *
      * @param port     the port to bind
      * @param poolSize the maximum enqueue request pool size
-     * @throws IOException indicating an I/O error occurs when opening the socket
+     * @throws IOException indicating an I/O error occurs when opening the server
      */
     public HttpServer(int port, int poolSize) throws IOException {
         if (port < 0 || port > 65535)
             throw new IllegalArgumentException();
-        this.socket = new ServerSocket(port, poolSize);
+        this.server = new ServerSocket(port, poolSize);
 
     }
 
@@ -55,12 +55,12 @@ public class HttpServer implements AutoCloseable {
      * @param port     the port to bind
      * @param poolSize the maximum enqueue request pool size
      * @param address  the local IP address to bind
-     * @throws IOException indicating an I/O error occurs when opening the socket
+     * @throws IOException indicating an I/O error occurs when opening the server
      */
     public HttpServer(int port, int poolSize, InetAddress address) throws IOException {
         if (port < 0 || port > 65535)
             throw new IllegalArgumentException();
-        this.socket = new ServerSocket(port, poolSize, address);
+        this.server = new ServerSocket(port, poolSize, address);
     }
 
     /**
@@ -72,9 +72,9 @@ public class HttpServer implements AutoCloseable {
      * @throws Exception indicating an error occurred reading the request or generating the response
      */
     public void accept(RequestVisitor visitor) throws Exception {
-        if (socket.isClosed())
+        if (server.isClosed())
             throw new IOException("HttpServer closed.");
-        final Socket socket = HttpServer.this.socket.accept();
+        Socket socket = server.accept();
         InputStream in = socket.getInputStream();
         OutputStream out = socket.getOutputStream();
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -97,11 +97,11 @@ public class HttpServer implements AutoCloseable {
     }
 
     /**
-     * Closes the underlying socket, immediately shutting down currently handled requests.
+     * Closes the underlying server, immediately shutting down currently handled requests.
      *
      * @throws Exception indicating an error occurred shutting down currently blocked sockets being handled by a {@code RequestVisitor}
      */
     public void close() throws Exception {
-        socket.close();
+        server.close();
     }
 }
