@@ -45,7 +45,7 @@ public class Controller implements RequestVisitor {
                 if (!method.isAnnotationPresent(Route.class))
                     return;
                 if (!Response.class.isAssignableFrom(method.getReturnType()))
-                    throw new IllegalArgumentException("Routes must return a Response or a subclass of Response.");
+                    throw new IllegalArgumentException("Routes must return a Response or a subclass of Response. " + method);
                 Route route = method.getAnnotation(Route.class);
                 String requestType = route.requestType();
                 String pattern = route.pattern();

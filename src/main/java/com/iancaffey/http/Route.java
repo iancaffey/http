@@ -24,7 +24,7 @@ public @interface Route {
      *
      * @return the route request type
      */
-    public String requestType() default "GET";
+    public String requestType() default Request.GET;
 
     /**
      * Returns the direct path for the route.
