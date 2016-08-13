@@ -28,6 +28,19 @@ public class Response {
     private final Map<String, String> headers;
 
     /**
+     * Constructs a new {@code Response} with a specified response code and headers.
+     *
+     * @param code    the response code
+     * @param headers the response headers
+     */
+    public Response(ResponseCode code, Map<String, String> headers) {
+        if (code == null || headers == null)
+            throw new IllegalArgumentException();
+        this.code = code;
+        this.headers = headers;
+    }
+
+    /**
      * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code and empty headers.
      *
      * @return a new {@code Response}
@@ -200,19 +213,6 @@ public class Response {
                     writer.write(read);
             }
         };
-    }
-
-    /**
-     * Constructs a new {@code Response} with a specified response code and headers.
-     *
-     * @param code    the response code
-     * @param headers the response headers
-     */
-    public Response(ResponseCode code, Map<String, String> headers) {
-        if (code == null || headers == null)
-            throw new IllegalArgumentException();
-        this.code = code;
-        this.headers = headers;
     }
 
     /**

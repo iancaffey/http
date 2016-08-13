@@ -17,11 +17,11 @@ import java.net.Socket;
  * @since 1.0
  */
 public class HttpServer implements AutoCloseable {
-    private final ServerSocket server;
     /**
      * Supported HTTP version for handling requests and generating responses.
      */
     public static final String HTTP_VERSION = "HTTP/1.1";
+    private final ServerSocket server;
 
     /**
      * Constructs a new {@code HttpServer} bound to a specified port.
