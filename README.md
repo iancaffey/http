@@ -16,6 +16,6 @@ Java http server and web application framework.
 ```java
     HttpServer server = new HttpServer(8080);
     Response response = Response.ok("<title>HTTP Test</title><p>Test</p>");
-    RoutingTable table = RoutingTable.singleton(Request.GET, URIPattern.compile("/?id=[0-9]+"), response);
+    RoutingTable table = RoutingTable.singleton(Request.GET, "/", response);
     server.accept(Router.of(table));
 ```
