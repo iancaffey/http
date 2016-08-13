@@ -1,7 +1,6 @@
 package com.iancaffey.http.routes;
 
 import com.iancaffey.http.model.Response;
-import com.iancaffey.http.util.URIPattern;
 
 import java.util.Collections;
 import java.util.Map;
@@ -45,33 +44,19 @@ public class RoutingTable {
      * @param response    the response
      * @return a new {@code RoutingTable}
      */
-    public static RoutingTable singletonDirect(String requestType, String path, Response response) {
+    public static RoutingTable of(String requestType, String path, Response response) {
         return new RoutingTable(requestType, Collections.singletonMap(path, response), Collections.emptyMap());
     }
 
     /**
      * Constructs a new {@code RoutingTable} for a specific request type with a single pattern-based response provided.
-     * <p>
-     * The specified Regular Expression pattern is compiled using {@code URIPattern.compile(String)}.
      *
      * @param requestType the request type
      * @param pattern     the expression pattern
      * @param response    the response
      * @return a new {@code RoutingTable}
      */
-    public static RoutingTable singletonPattern(String requestType, String pattern, Response response) {
-        return RoutingTable.singletonPattern(requestType, URIPattern.compile(pattern), response);
-    }
-
-    /**
-     * Constructs a new {@code RoutingTable} for a specific request type with a single pattern-based response provided.
-     *
-     * @param requestType the request type
-     * @param pattern     the expression pattern
-     * @param response    the response
-     * @return a new {@code RoutingTable}
-     */
-    public static RoutingTable singletonPattern(String requestType, Pattern pattern, Response response) {
+    public static RoutingTable of(String requestType, Pattern pattern, Response response) {
         return new RoutingTable(requestType, Collections.emptyMap(), Collections.singletonMap(pattern, response));
     }
 
