@@ -1,5 +1,6 @@
 package com.iancaffey.http.routes;
 
+import com.iancaffey.http.model.Response;
 import com.iancaffey.http.util.URIPattern;
 
 import java.util.Collections;
@@ -9,69 +10,69 @@ import java.util.regex.Pattern;
 /**
  * RoutingTable
  * <p>
- * An object representing all possible route paths for a request type. Both direct and pattern-based routes can be added.
- * Direct routes use a equals check against the given URI for selection.
- * Pattern-based routes use Java Regular Expressions to find a full match on the given URI for selection.
+ * An object representing all possible response paths for a request type. Both direct and pattern-based responses can be added.
+ * Direct responses use a equals check against the given URI for selection.
+ * Pattern-based responses use Java Regular Expressions to find a full match on the given URI for selection.
  *
  * @author Ian Caffey
  * @since 1.0
  */
 public class RoutingTable {
     private final String requestType;
-    private final Map<String, Route> directRoutes;
-    private final Map<Pattern, Route> patternRoutes;
+    private final Map<String, Response> directResponses;
+    private final Map<Pattern, Response> patternResponses;
 
     /**
-     * Constructs a new {@code RoutingTable} for a specific request type with given direct routes and pattern routes.
+     * Constructs a new {@code RoutingTable} for a specific request type with given direct responses and pattern responses.
      *
-     * @param requestType   the request type
-     * @param directRoutes  the direct/literal route paths
-     * @param patternRoutes the pattern-based route paths
+     * @param requestType      the request type
+     * @param directResponses  the direct/literal response paths
+     * @param patternResponses the pattern-based response paths
      */
-    public RoutingTable(String requestType, Map<String, Route> directRoutes, Map<Pattern, Route> patternRoutes) {
-        if (requestType == null || directRoutes == null || patternRoutes == null)
+    public RoutingTable(String requestType, Map<String, Response> directResponses, Map<Pattern, Response> patternResponses) {
+        if (requestType == null || directResponses == null || patternResponses == null)
             throw new IllegalArgumentException();
         this.requestType = requestType;
-        this.directRoutes = directRoutes;
-        this.patternRoutes = patternRoutes;
+        this.directResponses = directResponses;
+        this.patternResponses = patternResponses;
     }
 
     /**
-     * Constructs a new {@code RoutingTable} for a specific request type with a single direct route provided.
+     * Constructs a new {@code RoutingTable} for a specific request type with a single direct response provided.
      *
      * @param requestType the request type
-     * @param path        the direct/literal route path
-     * @param route       the route
+     * @param path        the direct/literal response path
+     * @param response    the response
      * @return a new {@code RoutingTable}
      */
-    public static RoutingTable singletonDirectRoute(String requestType, String path, Route route) {
-        return new RoutingTable(requestType, Collections.singletonMap(path, route), Collections.emptyMap());
+    public static RoutingTable singletonDirect(String requestType, String path, Response response) {
+        return new RoutingTable(requestType, Collections.singletonMap(path, response), Collections.emptyMap());
     }
 
     /**
-     * Constructs a new {@code RoutingTable} for a specific request type with a single pattern-based route provided.
+     * Constructs a new {@code RoutingTable} for a specific request type with a single pattern-based response provided.
      * <p>
      * The specified Regular Expression pattern is compiled using {@code URIPattern.compile(String)}.
      *
      * @param requestType the request type
      * @param pattern     the expression pattern
-     * @param route       the route
+     * @param response    the response
      * @return a new {@code RoutingTable}
      */
-    public static RoutingTable singletonPatternRoute(String requestType, String pattern, Route route) {
-        return RoutingTable.singletonPatternRoute(requestType, URIPattern.compile(pattern), route);
+    public static RoutingTable singletonPattern(String requestType, String pattern, Response response) {
+        return RoutingTable.singletonPattern(requestType, URIPattern.compile(pattern), response);
     }
 
     /**
-     * Constructs a new {@code RoutingTable} for a specific request type with a single pattern-based route provided.
+     * Constructs a new {@code RoutingTable} for a specific request type with a single pattern-based response provided.
      *
      * @param requestType the request type
      * @param pattern     the expression pattern
-     * @param route       the route
+     * @param response    the response
      * @return a new {@code RoutingTable}
      */
-    public static RoutingTable singletonPatternRoute(String requestType, Pattern pattern, Route route) {
-        return new RoutingTable(requestType, Collections.emptyMap(), Collections.singletonMap(pattern, route));
+    public static RoutingTable singletonPattern(String requestType, Pattern pattern, Response response) {
+        return new RoutingTable(requestType, Collections.emptyMap(), Collections.singletonMap(pattern, response));
     }
 
     /**
@@ -84,23 +85,23 @@ public class RoutingTable {
     }
 
     /**
-     * Locates the best route that matches the uri.
+     * Locates the best response that matches the uri.
      * <p>
-     * Direct routes are searched first, and then each pattern-based route is checked for a full match against the uri.
+     * Direct responses are searched first, and then each pattern-based response is checked for a full match against the uri.
      * <p>
-     * If no direct routes are found and there are no full-match pattern-based routes, an attempt to find a partial match
-     * for a pattern-based route will be made.
+     * If no direct responses are found and there are no full-match pattern-based responses, an attempt to find a partial match
+     * for a pattern-based response will be made.
      *
      * @param uri the uri
-     * @return the best route that matched the uri
+     * @return the best response that matched the uri
      */
-    public Route find(String uri) {
-        if (directRoutes.containsKey(uri))
-            return directRoutes.get(uri);
-        for (Map.Entry<Pattern, Route> entry : patternRoutes.entrySet())
+    public Response find(String uri) {
+        if (directResponses.containsKey(uri))
+            return directResponses.get(uri);
+        for (Map.Entry<Pattern, Response> entry : patternResponses.entrySet())
             if (entry.getKey().matcher(uri).matches())
                 return entry.getValue();
-        for (Map.Entry<Pattern, Route> entry : patternRoutes.entrySet())
+        for (Map.Entry<Pattern, Response> entry : patternResponses.entrySet())
             if (entry.getKey().matcher(uri).find())
                 return entry.getValue();
         return null;

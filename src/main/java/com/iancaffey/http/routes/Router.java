@@ -2,6 +2,7 @@ package com.iancaffey.http.routes;
 
 import com.iancaffey.http.io.RequestVisitor;
 import com.iancaffey.http.io.ResponseWriter;
+import com.iancaffey.http.model.Response;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,15 +14,15 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>
  * An object that routes incoming HTTP requests to an appropriate routing table for response.
  * <p>
- * Router is thread-safe, making use of a {@code Semaphore} to ensure the {@code Route} located within the routing table
- * when visiting the request data persists until {@code Router#response(ResponseWriter)} is called.
+ * Router is thread-safe, making use of a thread-local response to ensure the {@code Route} located within the routing table
+ * when visiting the request data is consistent until when {@code Router#response(ResponseWriter)} is called.
  *
  * @author Ian Caffey
  * @since 1.0
  */
 public class Router implements RequestVisitor {
     private final Semaphore semaphore = new Semaphore(0);
-    private final AtomicReference<Route> selected = new AtomicReference<>();
+    private final AtomicReference<Response> selected = new AtomicReference<>();
     private final Map<String, RoutingTable> requestTypeTables = new ConcurrentHashMap<>();
 
     /**
@@ -55,7 +56,7 @@ public class Router implements RequestVisitor {
      * @return the best route that matched the uri
      * @see RoutingTable#find(String)
      */
-    public Route route(String requestType, String uri) {
+    public Response route(String requestType, String uri) {
         return requestTypeTables.containsKey(requestType) ? requestTypeTables.get(requestType).find(uri) : null;
     }
 
@@ -101,11 +102,11 @@ public class Router implements RequestVisitor {
     @Override
     public void respond(ResponseWriter writer) throws Exception {
         semaphore.acquire();
-        Route route = selected.get();
+        Response response = selected.get();
         semaphore.release();
-        if (route == null)
-            throw new IllegalStateException("Missing route.");
-        route.apply(writer);
+        if (response == null)
+            throw new IllegalStateException("Missing response.");
+        response.apply(writer);
         writer.close();
     }
 }

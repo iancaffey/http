@@ -1,5 +1,8 @@
 package com.iancaffey.http.io;
 
+import com.iancaffey.http.HttpServer;
+import com.iancaffey.http.util.ResponseCode;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,6 +21,30 @@ import java.time.format.DateTimeFormatter;
  * @since 1.0
  */
 public class ResponseWriter extends PrintStream {
+    /**
+     * Response header "Content-Length".
+     */
+    public static final String CONTENT_LENGTH = "Content-Length";
+    /**
+     * Response header "Content-Type".
+     */
+    public static final String CONTENT_TYPE = "Content-Type";
+    /**
+     * Response header "Date".
+     */
+    public static final String DATE = "Date";
+    /**
+     * Response header "Expires".
+     */
+    public static final String EXPIRES = "Expires";
+    /**
+     * Response header "Last-modified".
+     */
+    public static final String LAST_MODIFIED = "Last-modified";
+    /**
+     * Response header "Server".
+     */
+    public static final String SERVER = "Server";
     private final InputStream in;
 
     /**
@@ -43,7 +70,7 @@ public class ResponseWriter extends PrintStream {
      * @param length the content-length header entry value
      */
     public void printContentLength(long length) {
-        printHeader("Content-Length", length);
+        printHeader(ResponseWriter.CONTENT_LENGTH, length);
     }
 
     /**
@@ -52,7 +79,7 @@ public class ResponseWriter extends PrintStream {
      * @param type the content-type header entry value
      */
     public void printContentType(String type) {
-        printHeader("Content-Type", type);
+        printHeader(ResponseWriter.CONTENT_TYPE, type);
     }
 
     /**
@@ -63,7 +90,8 @@ public class ResponseWriter extends PrintStream {
      * @param instant the date header entry value
      */
     public void printDate(Instant instant) {
-        printHeader("Date", instant == null ? null : DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
+        printHeader(ResponseWriter.DATE, instant == null ? null :
+                DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
     }
 
     /**
@@ -74,7 +102,8 @@ public class ResponseWriter extends PrintStream {
      * @param instant the expires header entry value
      */
     public void printExpiration(Instant instant) {
-        printHeader("Expires", instant == null ? "Never" : DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
+        printHeader(ResponseWriter.EXPIRES, instant == null ? "Never" :
+                DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
     }
 
     /**
@@ -85,7 +114,8 @@ public class ResponseWriter extends PrintStream {
      * @param instant the last-modified header entry value
      */
     public void printLastModified(Instant instant) {
-        printHeader("Last-modified", instant == null ? "Never" : DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
+        printHeader(ResponseWriter.LAST_MODIFIED, instant == null ? "Never" :
+                DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
     }
 
     /**
@@ -94,7 +124,18 @@ public class ResponseWriter extends PrintStream {
      * @param server the server header entry value
      */
     public void printServer(String server) {
-        printHeader("Server", server);
+        printHeader(ResponseWriter.SERVER, server);
+    }
+
+    /**
+     * Writes out the response code header entry to the {@code OutputStream}, appending "\r\n".
+     *
+     * @param code the response code
+     */
+    public void printResponseCode(ResponseCode code) {
+        if (code == null)
+            throw new IllegalArgumentException();
+        printHeader(HttpServer.HTTP_VERSION + " " + code.value() + " " + code.message());
     }
 
     /**

@@ -37,6 +37,6 @@ public class URIPattern {
      * @return an escaped uri pattern
      */
     public static String escape(String pattern) {
-        return pattern.replace("/?", "/\\\\?");
+        return pattern.replace("/?", "/\\?");
     }
 }

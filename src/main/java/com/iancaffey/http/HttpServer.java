@@ -18,6 +18,10 @@ import java.net.Socket;
  */
 public class HttpServer implements AutoCloseable {
     private final ServerSocket server;
+    /**
+     * Supported HTTP version for handling requests and generating responses.
+     */
+    public static final String HTTP_VERSION = "HTTP/1.1";
 
     /**
      * Constructs a new {@code HttpServer} bound to a specified port.
