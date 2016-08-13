@@ -44,7 +44,7 @@ public class RoutingTable {
      * @param response    the response
      * @return a new {@code RoutingTable}
      */
-    public static RoutingTable of(String requestType, String path, Response response) {
+    public static RoutingTable singleton(String requestType, String path, Response response) {
         return new RoutingTable(requestType, Collections.singletonMap(path, response), Collections.emptyMap());
     }
 
@@ -56,7 +56,7 @@ public class RoutingTable {
      * @param response    the response
      * @return a new {@code RoutingTable}
      */
-    public static RoutingTable of(String requestType, Pattern pattern, Response response) {
+    public static RoutingTable singleton(String requestType, Pattern pattern, Response response) {
         return new RoutingTable(requestType, Collections.emptyMap(), Collections.singletonMap(pattern, response));
     }
 
