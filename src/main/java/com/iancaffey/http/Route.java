@@ -1,4 +1,4 @@
-package com.iancaffey.http.model;
+package com.iancaffey.http;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

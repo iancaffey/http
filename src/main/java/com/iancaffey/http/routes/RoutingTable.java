@@ -1,6 +1,6 @@
 package com.iancaffey.http.routes;
 
-import com.iancaffey.http.model.Response;
+import com.iancaffey.http.Response;
 
 import java.util.Collections;
 import java.util.Map;

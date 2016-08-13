@@ -1,4 +1,4 @@
-package com.iancaffey.http.model;
+package com.iancaffey.http;
 
 import com.iancaffey.http.io.ResponseWriter;
 import com.iancaffey.http.util.ResponseCode;

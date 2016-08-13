@@ -1,5 +1,8 @@
-package com.iancaffey.http.model;
+package com.iancaffey.http.routes;
 
+import com.iancaffey.http.Request;
+import com.iancaffey.http.Response;
+import com.iancaffey.http.Route;
 import com.iancaffey.http.io.RequestVisitor;
 import com.iancaffey.http.io.ResponseWriter;
 import com.iancaffey.http.util.URIPattern;

@@ -1,4 +1,4 @@
-package com.iancaffey.http.model;
+package com.iancaffey.http;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
