@@ -4,7 +4,7 @@ import com.iancaffey.http.Request;
 import com.iancaffey.http.Response;
 import com.iancaffey.http.Route;
 import com.iancaffey.http.io.RequestVisitor;
-import com.iancaffey.http.io.ResponseWriter;
+import com.iancaffey.http.io.HttpWriter;
 import com.iancaffey.http.util.URIPattern;
 
 import java.lang.reflect.Method;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * An object that routes incoming HTTP requests to an appropriate method for response.
  * <p>
  * Controller is thread-safe, making use of a thread-local response to ensure the {@code Route} located within the routing table
- * when visiting the request data is consistent until when {@code Router#response(ResponseWriter)} is called.
+ * when visiting the request data is consistent until when {@code Router#response(HttpWriter)} is called.
  * <p>
  * Controller provides a means to provide dynamic, parameterized routing mechanisms rather than a static {@code Router}.
  *
@@ -151,14 +151,14 @@ public class Controller implements RequestVisitor {
     /**
      * Responds to a HTTP request. Responses are not restricted to be done within the caller thread.
      * <p>
-     * The {@code RequestVisitor} is responsible for writing the response out and closing the {@code ResponseWriter} to
+     * The {@code RequestVisitor} is responsible for writing the response out and closing the {@code HttpWriter} to
      * complete the response for the request.
      *
      * @param writer the response writer
      * @throws Exception indicating there was an error writing out the response
      */
     @Override
-    public final void respond(ResponseWriter writer) throws Exception {
+    public final void respond(HttpWriter writer) throws Exception {
         Request request = this.request.get();
         if (request == null)
             throw new IllegalStateException("No active request being handled.");

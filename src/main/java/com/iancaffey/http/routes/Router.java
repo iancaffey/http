@@ -2,7 +2,7 @@ package com.iancaffey.http.routes;
 
 import com.iancaffey.http.Response;
 import com.iancaffey.http.io.RequestVisitor;
-import com.iancaffey.http.io.ResponseWriter;
+import com.iancaffey.http.io.HttpWriter;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * An object that routes incoming HTTP requests to an appropriate routing table for response.
  * <p>
  * Router is thread-safe, making use of a thread-local response to ensure the {@code Route} located within the routing table
- * when visiting the request data is consistent until when {@code Router#response(ResponseWriter)} is called.
+ * when visiting the request data is consistent until when {@code Router#response(HttpWriter)} is called.
  *
  * @author Ian Caffey
  * @since 1.0
@@ -63,7 +63,7 @@ public class Router implements RequestVisitor {
     /**
      * Visits the beginning header entry that details out request type, uri, and HTTP version.
      * <p>
-     * Using the request type and uri, the best {@code Route} is located and stored for use within {@code Router#response(ResponseWriter)}.
+     * Using the request type and uri, the best {@code Route} is located and stored for use within {@code Router#response(HttpWriter)}.
      *
      * @param requestType the request type
      * @param uri         the uri
@@ -89,10 +89,10 @@ public class Router implements RequestVisitor {
     /**
      * Responds to a HTTP request. Responses are not restricted to be done within the caller thread.
      * <p>
-     * The {@code RequestVisitor} is responsible for writing the response out and closing the {@code ResponseWriter} to
+     * The {@code RequestVisitor} is responsible for writing the response out and closing the {@code HttpWriter} to
      * complete the response for the request.
      * <p>
-     * If the route was successfully located, it will be applied to the {@code ResponseWriter} and afterwards, the writer
+     * If the route was successfully located, it will be applied to the {@code HttpWriter} and afterwards, the writer
      * will be closed. It is pertinent that the Route maintains thread-safety and external multi-threading be implemented
      * as the {@code Router} will close the writer before the {@code Route} has finished writing out the response.
      *
@@ -100,7 +100,7 @@ public class Router implements RequestVisitor {
      * @throws Exception indicating there was an error writing out the response or the route could not be found
      */
     @Override
-    public void respond(ResponseWriter writer) throws Exception {
+    public void respond(HttpWriter writer) throws Exception {
         semaphore.acquire();
         Response response = selected.get();
         semaphore.release();

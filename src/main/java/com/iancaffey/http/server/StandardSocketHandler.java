@@ -1,13 +1,13 @@
 package com.iancaffey.http.server;
 
+import com.iancaffey.http.io.HttpWriter;
 import com.iancaffey.http.io.RequestVisitor;
-import com.iancaffey.http.io.ResponseWriter;
 
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.Socket;
+import java.nio.channels.ByteChannel;
+import java.nio.channels.Channels;
+import java.nio.charset.StandardCharsets;
 
 /**
  * StandardSocketHandler
@@ -20,15 +20,22 @@ import java.net.Socket;
 public class StandardSocketHandler implements SocketHandler {
     /**
      * Accepts a {@code RequestVisitor} to be used on the incoming HTTP request.
+     * <p>
+     * Reading the header information is done using blocking I/O (BufferedReader) as doing so using the {@code SocketChannel}
+     * would be counter-intuitive as each byte would have to be read in sequence.
+     * <p>
+     * However, the respond method delegation to the {@code RequestVisitor} is provided an {@code HttpWriter} which uses
+     * non-blocking I/O operations.
+     * <p>
+     * {@code StandardCharsets.UTF_8} is used as the character set for decoding the request data.
      *
      * @param socket  the socket for the incoming connection/request
      * @param visitor the visitor to process the incoming HTTP request
      */
     @Override
     public void accept(Socket socket, RequestVisitor visitor) throws Exception {
-        InputStream in = socket.getInputStream();
-        OutputStream out = socket.getOutputStream();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+        ByteChannel channel = socket.getChannel();
+        BufferedReader reader = new BufferedReader(Channels.newReader(channel, StandardCharsets.UTF_8.newDecoder(), -1));
         String first = reader.readLine();
         int firstIndex = first.indexOf(' ');
         int secondIndex = first.indexOf(' ', firstIndex + 1);
@@ -44,7 +51,7 @@ public class StandardSocketHandler implements SocketHandler {
                 throw new IllegalStateException("Unable to handle header: " + header);
             visitor.visitHeader(header.substring(0, colon).trim(), header.substring(colon + 1).trim());
         }
-        visitor.respond(new ResponseWriter(in, out));
+        visitor.respond(new HttpWriter(channel));
     }
 
     /**

@@ -1,6 +1,6 @@
 package com.iancaffey.http;
 
-import com.iancaffey.http.io.ResponseWriter;
+import com.iancaffey.http.io.HttpWriter;
 import com.iancaffey.http.util.ResponseCode;
 
 import java.io.*;
@@ -136,11 +136,11 @@ public class Response {
     public static Response of(ResponseCode code, byte[] content) {
         return content == null ? Response.of(code) : new Response(code, new HashMap<>()) {
             @Override
-            public void apply(ResponseWriter writer) throws Exception {
+            public void apply(HttpWriter writer) throws Exception {
                 super.apply(writer);
                 writer.write(content);
             }
-        }.header(ResponseWriter.CONTENT_LENGTH, String.valueOf(content.length));
+        }.header(HttpWriter.CONTENT_LENGTH, String.valueOf(content.length));
     }
 
     /**
@@ -190,7 +190,7 @@ public class Response {
     public static Response of(ResponseCode code, File file) throws FileNotFoundException {
         return file == null ? Response.of(code) :
                 Response.of(code, new FileInputStream(file)).
-                        header(ResponseWriter.CONTENT_LENGTH, String.valueOf(file.length()));
+                        header(HttpWriter.CONTENT_LENGTH, String.valueOf(file.length()));
     }
 
     /**
@@ -204,7 +204,7 @@ public class Response {
     public static Response of(ResponseCode code, InputStream content) {
         return new Response(code, new HashMap<>()) {
             @Override
-            public void apply(ResponseWriter writer) throws Exception {
+            public void apply(HttpWriter writer) throws Exception {
                 super.apply(writer);
                 if (content == null)
                     return;
@@ -249,15 +249,15 @@ public class Response {
     }
 
     /**
-     * Writes out the response headers and message using the {@code ResponseWriter}.
+     * Writes out the response headers and message using the {@code HttpWriter}.
      *
      * @param writer the response writer
      * @throws Exception indicating an error occured while generating the response
      */
-    public void apply(ResponseWriter writer) throws Exception {
-        writer.printResponseCode(code);
+    public void apply(HttpWriter writer) throws Exception {
+        writer.writeResponseCode(code);
         for (Map.Entry<String, String> entry : headers.entrySet())
-            writer.printHeader(entry.getKey(), entry.getValue());
+            writer.writeHeader(entry.getKey(), entry.getValue());
         writer.endHeader();
     }
 }
