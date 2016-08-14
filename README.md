@@ -15,11 +15,7 @@ Java http server and web application framework.
 
 ```java
     HttpServer server = new HttpSocketServer(8080);
-    server.accept(Router.of(
-            RoutingTable.singleton(
-                    Request.GET,
-                    "/",
-                    ok("<title>HTTP Test</title><p>Test</p>")
-            )
-    ));
+    Response response = ok("<title>HTTP Test</title><p>Test</p>");
+    RoutingTable table = RoutingTable.singleton(Request.GET, "/", response);
+    server.accept(Router.of(table));
 ```
