@@ -3,8 +3,8 @@ package com.iancaffey.http.routes;
 import com.iancaffey.http.Request;
 import com.iancaffey.http.Response;
 import com.iancaffey.http.Route;
-import com.iancaffey.http.io.RequestVisitor;
 import com.iancaffey.http.io.HttpWriter;
+import com.iancaffey.http.io.RequestVisitor;
 import com.iancaffey.http.util.RoutingException;
 import com.iancaffey.http.util.URIPattern;
 
@@ -49,30 +49,30 @@ public class Controller implements RequestVisitor {
                     throw new IllegalArgumentException("Routes must return a Response or a subclass of Response. " + method);
                 Route route = method.getAnnotation(Route.class);
                 String requestType = route.requestType();
-                String pattern = route.pattern();
-                if (!pattern.isEmpty()) {
+                String path = route.value();
+                if (path.isEmpty())
+                    throw new IllegalArgumentException("Route paths must be non-empty.");
+                if (Route.ROUTE_PATTERN.matcher(path).find()) {
                     if (patternRoutes.containsKey(requestType)) {
-                        Pattern p = URIPattern.compile(pattern);
+                        Pattern p = URIPattern.compile(path);
                         compiledPatterns.put(method, p);
                         patternRoutes.get(requestType).put(p, method);
                     } else {
                         Map<Pattern, Method> typePatternRoutes = new HashMap<>();
-                        Pattern p = URIPattern.compile(pattern);
+                        Pattern p = URIPattern.compile(path);
                         compiledPatterns.put(method, p);
                         typePatternRoutes.put(p, method);
                         patternRoutes.put(requestType, typePatternRoutes);
                     }
-                    return;
-                }
-                String path = route.path();
-                if (path.isEmpty())
-                    throw new IllegalArgumentException("Routes must either have a non-empty path or non-empty pattern for identification.");
-                if (directRoutes.containsKey(requestType)) {
-                    directRoutes.get(requestType).put(path, method);
                 } else {
-                    Map<String, Method> typeDirectRoutes = new HashMap<>();
-                    typeDirectRoutes.put(path, method);
-                    directRoutes.put(requestType, typeDirectRoutes);
+                    if (directRoutes.containsKey(requestType)) {
+                        directRoutes.get(requestType).put(path, method);
+                    } else {
+                        Map<String, Method> typeDirectRoutes = new HashMap<>();
+                        typeDirectRoutes.put(path, method);
+                        directRoutes.put(requestType, typeDirectRoutes);
+                    }
+
                 }
             });
         } while ((c = c.getSuperclass()) != null);
@@ -94,10 +94,10 @@ public class Controller implements RequestVisitor {
     /**
      * Locates the best route that matches the request type and uri.
      * <p>
-     * Direct routes are searched first, and then each pattern-based route is checked for a full match against the uri.
+     * Direct routes are searched first, and then each value-based route is checked for a full match against the uri.
      * <p>
-     * If no direct routes are found and there are no full-match pattern-based routes, an attempt to find a partial match
-     * for a pattern-based routes will be made.
+     * If no direct routes are found and there are no full-match value-based routes, an attempt to find a partial match
+     * for a value-based routes will be made.
      * <p>
      *
      * @param requestType the request type
@@ -166,9 +166,9 @@ public class Controller implements RequestVisitor {
         Method method = selected.get();
         if (method == null)
             throw new RoutingException("Unable to find route.");
+        request.body(writer.in());
         method.setAccessible(true);
-        Route route = method.getAnnotation(Route.class);
-        if (!route.pattern().isEmpty()) {
+        if (Route.ROUTE_PATTERN.matcher(method.getAnnotation(Route.class).value()).find()) {
             Matcher matcher = compiledPatterns.get(method).matcher(request.uri());
             if (matcher.find()) {
                 int groups = matcher.groupCount();
@@ -182,18 +182,26 @@ public class Controller implements RequestVisitor {
                     Class<?> type = parameterTypes[i];
                     if (type == String.class)
                         objects[i] = s;
-                    else if (type == int.class || type == Integer.class)
-                        objects[i] = Integer.parseInt(s);
-                    else if (type == long.class || type == Long.class)
-                        objects[i] = Long.parseLong(s);
+                    else {
+                        try {
+                            if (type == int.class || type == Integer.class)
+                                objects[i] = Integer.parseInt(s);
+                            else if (type == long.class || type == Long.class)
+                                objects[i] = Long.parseLong(s);
+                            else if (type == float.class || type == Float.class)
+                                objects[i] = Float.parseFloat(s);
+                            else if (type == double.class || type == Double.class)
+                                objects[i] = Double.parseDouble(s);
+                        } catch (Exception e) {
+                            throw new RoutingException("Type mismatch. Unable to parse uri into arguments for route.");
+                        }
+                    }
                 }
-                Response response = (Response) method.invoke(this, objects);
-                response.apply(writer);
+                writer.write((Response) method.invoke(this, objects));
                 writer.close();
             }
         } else {
-            Response response = (Response) method.invoke(this);
-            response.apply(writer);
+            writer.write((Response) method.invoke(this));
             writer.close();
         }
     }

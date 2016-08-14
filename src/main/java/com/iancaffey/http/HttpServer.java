@@ -5,17 +5,12 @@ import com.iancaffey.http.io.RequestVisitor;
 /**
  * HttpServer
  * <p>
- * An object representing a basic HTTP server, supporting the full HTTP 1.1 specification.
+ * An object representing a basic HTTP server.
  *
  * @author Ian Caffey
  * @since 1.0
  */
 public interface HttpServer extends AutoCloseable {
-    /**
-     * Supported HTTP version for handling requests and generating responses.
-     */
-    public static final String HTTP_VERSION = "HTTP/1.1";
-
     /**
      * Accepts a {@code RequestVisitor} to be used on the next incoming HTTP request.
      * <p>
