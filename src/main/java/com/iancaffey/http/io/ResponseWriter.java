@@ -45,13 +45,15 @@ public class ResponseWriter extends PrintStream {
      * Response header "Server".
      */
     public static final String SERVER = "Server";
-    private final InputStream in;
+    public final InputStream in;
 
     /**
      * Constructs a new {@code ResponseWriter} with a specified {@code InputStream} and {@code OutputStream}.
      * <p>
      * Both streams are required as the {@code ResponseWriter} is responsible for cleaning up the streams once the response
      * has been successfully written to the {@code OutputStream}.
+     * <p>
+     * A {@code RequestVisitor} can also use the exposed {@code InputStream} for reading the message body.
      *
      * @param in  the input stream
      * @param out the output stream
@@ -62,7 +64,6 @@ public class ResponseWriter extends PrintStream {
             throw new IllegalArgumentException();
         this.in = in;
     }
-
 
     /**
      * Writes out the "Content-Length" header entry to the {@code OutputStream}, appending "\r\n".
