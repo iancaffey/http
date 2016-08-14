@@ -1,7 +1,5 @@
 package com.iancaffey.http.util;
 
-import com.iancaffey.http.Route;
-
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -39,6 +37,6 @@ public class URIPattern {
      * @return an escaped uri value
      */
     public static String escape(String pattern) {
-        return pattern.replace("/?", "/\\?").replaceAll(Route.ROUTE_PATTERN.pattern(), "(.+)");
+        return pattern.replace("/?", "/\\?").replace('{', '(').replace('}', ')');
     }
 }
