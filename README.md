@@ -6,7 +6,7 @@ Java http server and web application framework.
 ```java
     HttpServer server = new HttpSocketServer(8080);
     server.accept(new Controller() {
-        @Route(pattern = "/?id={[0-9]+}")
+        @Route("/?id={[0-9]+}")
         public Response id(int id) {
             return ok("<title>HTTP Test</title><p>Id: " + id + "</p>");
         }
