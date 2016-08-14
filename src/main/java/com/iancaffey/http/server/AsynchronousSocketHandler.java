@@ -3,7 +3,6 @@ package com.iancaffey.http.server;
 import com.iancaffey.http.io.RequestVisitor;
 
 import java.net.Socket;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -43,12 +42,9 @@ public class AsynchronousSocketHandler implements SocketHandler {
      */
     @Override
     public void accept(Socket socket, RequestVisitor visitor) throws Exception {
-        executor.submit(new Callable<Void>() {
-            @Override
-            public Void call() throws Exception {
-                handler.accept(socket, visitor);
-                return null;
-            }
+        executor.submit(() -> {
+            handler.accept(socket, visitor);
+            return null;
         });
     }
 
