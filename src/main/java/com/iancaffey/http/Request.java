@@ -2,6 +2,7 @@ package com.iancaffey.http;
 
 import java.nio.channels.ReadableByteChannel;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -103,13 +104,20 @@ public class Request extends Message {
      * @return the request parameters
      */
     public Map<String, String> parameters() {
-        switch(type){
+        switch (type) {
             case Request.GET:
                 String query = query();
-                if(query == null)
+                if (query == null)
                     return Collections.emptyMap();
-                String[] parameters = query.split("&");
-                return null;
+                String[] split = query.split("[&;]");
+                Map<String, String> parameters = new LinkedHashMap<>();
+                for (String s : split) {
+                    int index = s.indexOf('=');
+                    if (index == -1 || index == s.length() - 1)
+                        continue;
+                    parameters.put(s.substring(0, index), s.substring(index + 1));
+                }
+                return parameters;
             default:
                 throw new UnsupportedOperationException("Parameter parsing is unsupported for request type: " + type);
         }
