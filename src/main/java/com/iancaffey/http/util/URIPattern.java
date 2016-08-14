@@ -1,5 +1,7 @@
 package com.iancaffey.http.util;
 
+import com.iancaffey.http.Route;
+
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -18,10 +20,10 @@ public class URIPattern {
     }
 
     /**
-     * Escapes the query string and compiles the given regular expression into a pattern.
+     * Escapes the query string and compiles the given regular expression into a value.
      *
      * @param pattern The expression to be compiled
-     * @return the given regular expression compiled into a pattern
+     * @return the given regular expression compiled into a value
      * @throws PatternSyntaxException indicating the expression's syntax is invalid
      */
     public static Pattern compile(String pattern) {
@@ -33,10 +35,10 @@ public class URIPattern {
      * <p>
      * The question mark trailing the initial forward slash is escaped to treat it as a literal value.
      *
-     * @param pattern the uri pattern
-     * @return an escaped uri pattern
+     * @param pattern the uri value
+     * @return an escaped uri value
      */
     public static String escape(String pattern) {
-        return pattern.replace("/?", "/\\?");
+        return pattern.replace("/?", "/\\?").replaceAll(Route.ROUTE_PATTERN.pattern(), "(.+)");
     }
 }

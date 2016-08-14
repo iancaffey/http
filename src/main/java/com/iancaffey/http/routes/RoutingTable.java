@@ -12,21 +12,21 @@ import java.util.regex.Pattern;
 /**
  * RoutingTable
  * <p>
- * An object representing all possible response paths for a request type. Both direct and pattern-based responses can be added.
- * Direct responses use a equals check against the given URI for selection.
- * Pattern-based responses use Java Regular Expressions to find a full match on the given URI for selection.
+ * An object representing all possible response paths for a request type. Both absolute and pattern-based responses can be added.
+ * Absolute responses use a equals check against the given URI for selection.
+ * Pattern-based responses use Java Regular Expressions to find a full/partial match on the given URI for selection.
  *
  * @author Ian Caffey
  * @since 1.0
  */
 public class RoutingTable implements RequestVisitor {
     private final String requestType;
-    private final Map<String, Response> directResponses;
+    private final Map<String, Response> absoluteResponses;
     private final Map<Pattern, Response> patternResponses;
     private final ThreadLocal<Response> selected = new ThreadLocal<>();
 
     /**
-     * Constructs a new {@code RoutingTable} for a specific request type with a single direct response provided.
+     * Constructs a new {@code RoutingTable} for a specific request type with a single absolute response provided.
      *
      * @param requestType the request type
      * @param path        the direct/literal response path
@@ -40,7 +40,7 @@ public class RoutingTable implements RequestVisitor {
      * Constructs a new {@code RoutingTable} for a specific request type with a single pattern-based response provided.
      *
      * @param requestType the request type
-     * @param pattern     the expression pattern
+     * @param pattern     the expression value
      * @param response    the response
      */
     public RoutingTable(String requestType, Pattern pattern, Response response) {
@@ -48,17 +48,17 @@ public class RoutingTable implements RequestVisitor {
     }
 
     /**
-     * Constructs a new {@code RoutingTable} for a specific request type with given direct responses and pattern responses.
+     * Constructs a new {@code RoutingTable} for a specific request type with given absolute responses and pattern responses.
      *
-     * @param requestType      the request type
-     * @param directResponses  the direct/literal response paths
-     * @param patternResponses the pattern-based response paths
+     * @param requestType       the request type
+     * @param absoluteResponses the direct/literal response paths
+     * @param patternResponses  the pattern-based response paths
      */
-    public RoutingTable(String requestType, Map<String, Response> directResponses, Map<Pattern, Response> patternResponses) {
-        if (requestType == null || directResponses == null || patternResponses == null)
+    public RoutingTable(String requestType, Map<String, Response> absoluteResponses, Map<Pattern, Response> patternResponses) {
+        if (requestType == null || absoluteResponses == null || patternResponses == null)
             throw new IllegalArgumentException();
         this.requestType = requestType;
-        this.directResponses = directResponses;
+        this.absoluteResponses = absoluteResponses;
         this.patternResponses = patternResponses;
     }
 
@@ -74,17 +74,17 @@ public class RoutingTable implements RequestVisitor {
     /**
      * Locates the best response that matches the uri.
      * <p>
-     * Direct responses are searched first, and then each pattern-based response is checked for a full match against the uri.
+     * Absolute responses are searched first, and then each pattern-based response is checked for a full match against the uri.
      * <p>
-     * If no direct responses are found and there are no full-match pattern-based responses, an attempt to find a partial match
+     * If no absolute responses are found and there are no full-match pattern-based responses, an attempt to find a partial match
      * for a pattern-based response will be made.
      *
      * @param uri the uri
      * @return the best response that matched the uri
      */
     public Response find(String uri) {
-        if (directResponses.containsKey(uri))
-            return directResponses.get(uri);
+        if (absoluteResponses.containsKey(uri))
+            return absoluteResponses.get(uri);
         for (Map.Entry<Pattern, Response> entry : patternResponses.entrySet())
             if (entry.getKey().matcher(uri).matches())
                 return entry.getValue();
@@ -138,6 +138,6 @@ public class RoutingTable implements RequestVisitor {
         Response response = selected.get();
         if (response == null)
             throw new RoutingException("Unable to find response.");
-        response.apply(writer);
+        writer.write(response);
     }
 }

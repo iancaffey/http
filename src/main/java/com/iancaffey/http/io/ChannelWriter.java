@@ -38,10 +38,26 @@ public class ChannelWriter implements AutoCloseable {
      * @param out the output channel
      */
     public ChannelWriter(ReadableByteChannel in, WritableByteChannel out) {
-        if (in == null || out == null)
-            throw new IllegalArgumentException();
         this.in = in;
         this.out = out;
+    }
+
+    /**
+     * Returns the input channel.
+     *
+     * @return the input channel
+     */
+    public ReadableByteChannel in() {
+        return in;
+    }
+
+    /**
+     * Returns the output channel.
+     *
+     * @return the output channel
+     */
+    public WritableByteChannel out() {
+        return out;
     }
 
     /**
@@ -56,7 +72,7 @@ public class ChannelWriter implements AutoCloseable {
      * @throws IOException indicating an error occurred while reading from the input channel
      */
     public int read(ByteBuffer buffer) throws IOException {
-        return in.read(buffer);
+        return in == null ? -1 : in.read(buffer);
     }
 
     /**
@@ -71,7 +87,7 @@ public class ChannelWriter implements AutoCloseable {
      * @throws IOException indicating an error occurred while writing out to the output channel
      */
     public int write(ByteBuffer buffer) throws IOException {
-        return out.write(buffer);
+        return out == null ? -1 : out.write(buffer);
     }
 
     /**
@@ -181,7 +197,9 @@ public class ChannelWriter implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        in.close();
-        out.close();
+        if (in != null)
+            in.close();
+        if (out != null)
+            out.close();
     }
 }
