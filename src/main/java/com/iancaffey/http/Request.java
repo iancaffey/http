@@ -1,6 +1,7 @@
 package com.iancaffey.http;
 
-import java.util.LinkedHashMap;
+import java.nio.channels.ReadableByteChannel;
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -14,7 +15,7 @@ import java.util.Map;
  * @author Ian Caffey
  * @since 1.0
  */
-public class Request {
+public class Request extends Message {
     /**
      * HTTP request type for "GET". Requests data from a specified resource.
      */
@@ -30,10 +31,9 @@ public class Request {
     private final String type;
     private final String uri;
     private final String version;
-    private Map<String, String> headers;
 
     /**
-     * Constructs a new {@code Request} given complete header information.
+     * Constructs a new {@code Request} given complete header information and no message body.
      *
      * @param type    the request type
      * @param uri     the uri
@@ -41,10 +41,28 @@ public class Request {
      * @param headers the request headers
      */
     public Request(String type, String uri, String version, Map<String, String> headers) {
+        this(type, uri, version, headers, null, 0);
+    }
+
+    /**
+     * Constructs a new {@code Request} given complete header information and a message body.
+     * <p>
+     * Unknown body length is denoted by a length of -1.
+     *
+     * @param type    the request type
+     * @param uri     the uri
+     * @param version the HTTP version
+     * @param headers the request headers
+     * @param body    the request body
+     * @param length  the request body length
+     */
+    public Request(String type, String uri, String version, Map<String, String> headers, ReadableByteChannel body, long length) {
+        super(version, headers, body, length);
         this.type = type;
         this.uri = uri;
         this.version = version;
-        this.headers = headers;
+        if (Request.GET.equals(type))
+            remove(Message.CONTENT_LENGTH);
     }
 
     /**
@@ -66,44 +84,43 @@ public class Request {
     }
 
     /**
+     * Returns the query string.
+     * <p>
+     * The beginning question mark '?' is removed.
+     *
+     * @return the query string.
+     */
+    public String query() {
+        int index = uri.indexOf('?');
+        return index == -1 || index == uri.length() - 1 ? null : uri.substring(index + 1);
+    }
+
+    /**
+     * Returns the request parameters.
+     * <p>
+     * If the request type is {@code Request.GET}, the parameters are the parsed query string.
+     *
+     * @return the request parameters
+     */
+    public Map<String, String> parameters() {
+        switch(type){
+            case Request.GET:
+                String query = query();
+                if(query == null)
+                    return Collections.emptyMap();
+                String[] parameters = query.split("&");
+                return null;
+            default:
+                throw new UnsupportedOperationException("Parameter parsing is unsupported for request type: " + type);
+        }
+    }
+
+    /**
      * Returns the HTTP version used in the request.
      *
      * @return the request's HTTP version
      */
     public String version() {
         return version;
-    }
-
-    /**
-     * Updates the value for the header entry at the specified key or creates a new one if it does not exist.
-     *
-     * @param key   the header entry key
-     * @param value the header entry value
-     * @return {@code this} for method-chaining
-     */
-    public Request header(String key, String value) {
-        headers.put(key, value);
-        return this;
-    }
-
-    /**
-     * Returns the header entry value at the specified key.
-     *
-     * @param key the header entry key
-     * @return the value at the specified key, or {@code null} if it does not exist
-     */
-    public String header(String key) {
-        return headers.get(key);
-    }
-
-    /**
-     * Returns a copy of the entire headers map.
-     * <p>
-     * Original insertion order is maintained through the copy. The copy is mutable.
-     *
-     * @return a copy of the entire headers map
-     */
-    public Map<String, String> headers() {
-        return new LinkedHashMap<>(headers);
     }
 }

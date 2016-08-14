@@ -1,12 +1,14 @@
 package com.iancaffey.http;
 
-import com.iancaffey.http.io.HttpWriter;
 import com.iancaffey.http.util.ResponseCode;
 
 import java.io.*;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -23,21 +25,34 @@ import java.util.Map;
  * @author Ian Caffey
  * @since 1.0
  */
-public class Response {
+public class Response extends Message {
     private final ResponseCode code;
-    private final Map<String, String> headers;
 
     /**
-     * Constructs a new {@code Response} with a specified response code and headers.
+     * Constructs a new {@code Response} with a specified response code, headers, and no body.
      *
+     * @param version the HTTP version
      * @param code    the response code
      * @param headers the response headers
      */
-    public Response(ResponseCode code, Map<String, String> headers) {
-        if (code == null || headers == null)
-            throw new IllegalArgumentException();
+    public Response(String version, ResponseCode code, Map<String, String> headers) {
+        this(version, code, headers, null, 0);
+    }
+
+    /**
+     * Constructs a new {@code Response} with a specified response code, headers, and body.
+     * <p>
+     * Unknown body length is denoted by a length of -1.
+     *
+     * @param version the HTTP version
+     * @param code    the response code
+     * @param headers the response headers
+     * @param body    the response body
+     * @param length  the response body length
+     */
+    public Response(String version, ResponseCode code, Map<String, String> headers, ReadableByteChannel body, long length) {
+        super(version, headers, body, length);
         this.code = code;
-        this.headers = headers;
     }
 
     /**
@@ -50,8 +65,7 @@ public class Response {
     }
 
     /**
-     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code, headers,
-     * and a body represented by a {@code byte[]}.
+     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code and a body represented by a {@code byte[]}.
      *
      * @param content the response body
      * @return a new {@code Response}
@@ -61,8 +75,7 @@ public class Response {
     }
 
     /**
-     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code, headers,
-     * and a body represented by a {@code String}.
+     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code and a body represented by a {@code String}.
      *
      * @param content the response body
      * @return a new {@code Response}
@@ -72,8 +85,7 @@ public class Response {
     }
 
     /**
-     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code, headers,
-     * and a body represented by a {@code String} with a given charset.
+     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code and a body represented by a {@code String} with a given charset.
      *
      * @param content the response body
      * @return a new {@code Response}
@@ -83,8 +95,7 @@ public class Response {
     }
 
     /**
-     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code, headers,
-     * and a body represented by a {@code String} with a given charset.
+     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code and a body represented by a {@code String} with a given charset.
      *
      * @param content the response body
      * @return a new {@code Response}
@@ -94,25 +105,24 @@ public class Response {
     }
 
     /**
-     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code, headers,
-     * and a body represented by a {@code File}.
+     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code and a body represented by a {@code File}.
      *
      * @param file the response body
      * @return a new {@code Response}
      */
-    public static Response ok(File file) throws FileNotFoundException {
+    public static Response ok(File file) throws IOException {
         return Response.of(ResponseCode.OK, file);
     }
 
     /**
-     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code, headers,
-     * and a body represented by an {@code InputStream}.
+     * Constructs a new {@code Response} with a {@code ResponseCode.OK} response code and a body represented by an {@code InputStream}.
      *
      * @param content the response body
+     * @param length  the response body length
      * @return a new {@code Response}
      */
-    public static Response ok(InputStream content) {
-        return Response.of(ResponseCode.OK, content);
+    public static Response ok(InputStream content, long length) {
+        return Response.of(ResponseCode.OK, content, length);
     }
 
     /**
@@ -122,30 +132,24 @@ public class Response {
      * @return a new {@code Response}
      */
     public static Response of(ResponseCode code) {
-        return new Response(code, new HashMap<>());
+        return new Response(Message.HTTP_VERSION, code, new HashMap<>());
     }
 
     /**
-     * Constructs a new {@code Response} with a specified response code, headers,
-     * and a body represented by a {@code byte[]}.
+     * Constructs a new {@code Response} with a specified response code and a body represented by a {@code byte[]}.
      *
      * @param code    the response code
      * @param content the response body
      * @return a new {@code Response}
      */
     public static Response of(ResponseCode code, byte[] content) {
-        return content == null ? Response.of(code) : new Response(code, new HashMap<>()) {
-            @Override
-            public void apply(HttpWriter writer) throws Exception {
-                super.apply(writer);
-                writer.write(content);
-            }
-        }.header(HttpWriter.CONTENT_LENGTH, String.valueOf(content.length));
+        return content == null ? Response.of(code) :
+                new Response(Message.HTTP_VERSION, code, new HashMap<>(),
+                        Channels.newChannel(new ByteArrayInputStream(content)), content.length);
     }
 
     /**
-     * Constructs a new {@code Response} with a specified response code, headers,
-     * and a body represented by an {@code String}.
+     * Constructs a new {@code Response} with a specified response code and a body represented by an {@code String}.
      *
      * @param code    the response code
      * @param content the response body
@@ -156,8 +160,7 @@ public class Response {
     }
 
     /**
-     * Constructs a new {@code Response} with a specified response code, headers,
-     * and a body represented by a {@code String} with a given charset.
+     * Constructs a new {@code Response} with a specified response code and a body represented by a {@code String} with a given charset.
      *
      * @param code    the response code
      * @param content the response body
@@ -168,8 +171,7 @@ public class Response {
     }
 
     /**
-     * Constructs a new {@code Response} with a specified response code, headers,
-     * and a body represented by a {@code String} with a given charset.
+     * Constructs a new {@code Response} with a specified response code and a body represented by a {@code String} with a given charset.
      *
      * @param code    the response code
      * @param content the response body
@@ -187,77 +189,41 @@ public class Response {
      * @param file the response body
      * @return a new {@code Response}
      */
-    public static Response of(ResponseCode code, File file) throws FileNotFoundException {
+    public static Response of(ResponseCode code, File file) throws IOException {
         return file == null ? Response.of(code) :
-                Response.of(code, new FileInputStream(file)).
-                        header(HttpWriter.CONTENT_LENGTH, String.valueOf(file.length()));
+                Response.of(code, Files.newByteChannel(file.toPath(), StandardOpenOption.READ), file.length());
     }
 
     /**
-     * Constructs a new {@code Response} with a specified response code, headers,
-     * and a body represented by an {@code InputStream}.
+     * Constructs a new {@code Response} with a specified response code and a body represented by an {@code InputStream}.
      *
      * @param code    the response code
      * @param content the response body
+     * @param length  the response body length
      * @return a new {@code Response}
      */
-    public static Response of(ResponseCode code, InputStream content) {
-        return new Response(code, new HashMap<>()) {
-            @Override
-            public void apply(HttpWriter writer) throws Exception {
-                super.apply(writer);
-                if (content == null)
-                    return;
-                int read;
-                while ((read = content.read()) != -1)
-                    writer.write(read);
-            }
-        };
+    public static Response of(ResponseCode code, InputStream content, long length) {
+        return Response.of(code, Channels.newChannel(content), length);
     }
 
     /**
-     * Updates the value for the header entry at the specified key or creates a new one if it does not exist.
+     * Constructs a new {@code Response} with a specified response code and a body represented by an {@code ReadableByteChannel}.
      *
-     * @param key   the header entry key
-     * @param value the header entry value
-     * @return {@code this} for method-chaining
+     * @param code   the response code
+     * @param body   the response body
+     * @param length the response body length
+     * @return a new {@code Response}
      */
-    public Response header(String key, String value) {
-        headers.put(key, value);
-        return this;
+    public static Response of(ResponseCode code, ReadableByteChannel body, long length) {
+        return new Response(Message.HTTP_VERSION, code, new HashMap<>(), body, length);
     }
 
     /**
-     * Returns the header entry value at the specified key.
+     * Returns the response code.
      *
-     * @param key the header entry key
-     * @return the value at the specified key, or {@code null} if it does not exist
+     * @return the response code
      */
-    public String header(String key) {
-        return headers.get(key);
-    }
-
-    /**
-     * Returns a copy of the entire headers map.
-     * <p>
-     * Original insertion order is maintained through the copy. The copy is mutable.
-     *
-     * @return a copy of the entire headers map
-     */
-    public Map<String, String> headers() {
-        return new LinkedHashMap<>(headers);
-    }
-
-    /**
-     * Writes out the response headers and message using the {@code HttpWriter}.
-     *
-     * @param writer the response writer
-     * @throws Exception indicating an error occured while generating the response
-     */
-    public void apply(HttpWriter writer) throws Exception {
-        writer.writeResponseCode(code);
-        for (Map.Entry<String, String> entry : headers.entrySet())
-            writer.writeHeader(entry.getKey(), entry.getValue());
-        writer.endHeader();
+    public ResponseCode code() {
+        return code;
     }
 }
