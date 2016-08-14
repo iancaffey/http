@@ -5,6 +5,7 @@ import com.iancaffey.http.Response;
 import com.iancaffey.http.Route;
 import com.iancaffey.http.io.RequestVisitor;
 import com.iancaffey.http.io.HttpWriter;
+import com.iancaffey.http.util.RoutingException;
 import com.iancaffey.http.util.URIPattern;
 
 import java.lang.reflect.Method;
@@ -144,7 +145,7 @@ public class Controller implements RequestVisitor {
     public final void visitHeader(String key, String value) {
         Request request = this.request.get();
         if (request == null)
-            throw new IllegalStateException("No active request being handled.");
+            throw new RoutingException("No active request being handled.");
         request.header(key, value);
     }
 
@@ -161,10 +162,10 @@ public class Controller implements RequestVisitor {
     public final void respond(HttpWriter writer) throws Exception {
         Request request = this.request.get();
         if (request == null)
-            throw new IllegalStateException("No active request being handled.");
+            throw new RoutingException("No active request being handled.");
         Method method = selected.get();
         if (method == null)
-            throw new IllegalStateException("Unable to find route.");
+            throw new RoutingException("Unable to find route.");
         method.setAccessible(true);
         Route route = method.getAnnotation(Route.class);
         if (!route.pattern().isEmpty()) {

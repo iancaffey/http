@@ -1,13 +1,12 @@
 package com.iancaffey.http.routes;
 
 import com.iancaffey.http.Response;
-import com.iancaffey.http.io.RequestVisitor;
 import com.iancaffey.http.io.HttpWriter;
+import com.iancaffey.http.io.RequestVisitor;
+import com.iancaffey.http.util.RoutingException;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Router
@@ -21,9 +20,8 @@ import java.util.concurrent.atomic.AtomicReference;
  * @since 1.0
  */
 public class Router implements RequestVisitor {
-    private final Semaphore semaphore = new Semaphore(0);
-    private final AtomicReference<Response> selected = new AtomicReference<>();
     private final Map<String, RoutingTable> requestTypeTables = new ConcurrentHashMap<>();
+    private final ThreadLocal<RoutingTable> selected = new ThreadLocal<>();
 
     /**
      * Constructs a new {@code Router} with a {@code RoutingTable} already registered.
@@ -49,7 +47,7 @@ public class Router implements RequestVisitor {
     }
 
     /**
-     * Locates the {@code Route} within the appropriate {@code RoutingTable} for the uri.
+     * Locates the {@code Response} within the appropriate {@code RoutingTable} for the uri.
      *
      * @param requestType the request type
      * @param uri         the uri
@@ -71,8 +69,9 @@ public class Router implements RequestVisitor {
      */
     @Override
     public void visitRequest(String requestType, String uri, String version) {
-        selected.set(route(requestType, uri));
-        semaphore.release();
+        RoutingTable table = requestTypeTables.get(requestType);
+        table.visitRequest(requestType, uri, version);
+        selected.set(table);
     }
 
     /**
@@ -83,7 +82,10 @@ public class Router implements RequestVisitor {
      */
     @Override
     public void visitHeader(String key, String value) {
-
+        RoutingTable table = selected.get();
+        if (table == null)
+            throw new RoutingException("No active request being handled.");
+        table.visitHeader(key, value);
     }
 
     /**
@@ -101,12 +103,9 @@ public class Router implements RequestVisitor {
      */
     @Override
     public void respond(HttpWriter writer) throws Exception {
-        semaphore.acquire();
-        Response response = selected.get();
-        semaphore.release();
-        if (response == null)
-            throw new IllegalStateException("Missing response.");
-        response.apply(writer);
-        writer.close();
+        RoutingTable table = selected.get();
+        if (table == null)
+            throw new RoutingException("No active request being handled.");
+        table.respond(writer);
     }
 }
