@@ -1,8 +1,8 @@
 package com.iancaffey.http.routes;
 
-import com.iancaffey.http.HttpServer;
 import com.iancaffey.http.HttpHandler;
 import com.iancaffey.http.HttpReader;
+import com.iancaffey.http.HttpServer;
 import com.iancaffey.http.HttpWriter;
 import com.iancaffey.http.util.RoutePath;
 import com.iancaffey.http.util.RoutingException;
@@ -88,6 +88,23 @@ public class Router implements HttpHandler {
      */
     public static void addRoutes(Class<?> c, Router router) {
         Router.addRoutes(c, null, router);
+    }
+
+    /**
+     * Converts the methods annotated with {@code Get}, {@code Post}, and {@code Delete} to routes and adds them to the specified router.
+     * <p>
+     * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
+     * <p>
+     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
+     * have access to the incoming request and generate dynamic content.
+     *
+     * @param o      the controller instance (if there are instance methods representing routes)
+     * @param router the target router
+     */
+    public static void addRoutes(Object o, Router router) {
+        if (o == null)
+            throw new IllegalArgumentException();
+        Router.addRoutes(o.getClass(), o, router);
     }
 
     /**

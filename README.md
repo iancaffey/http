@@ -5,13 +5,11 @@ Java http server and web application framework.
 
 ```java
     HttpServer server = HttpServer.bind(8080);
-    server.accept(Controller.class);
-    server.listen();
-    ...    
-    public static class Controller {
+    server.accept(new Controller() {
         @Get("/")
-        public static HttpHandler index() {
-            return Response.code(ResponseCode.OK);
+        public HttpHandler index() {
+            return code(ResponseCode.OK);
         }
-    }
+    });
+    server.listen();
 ```

@@ -126,10 +126,9 @@ public class HttpServer extends Server {
      * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
      * have access to the incoming request and generate dynamic content.
      *
-     * @param c the controller class
      * @param o the controller instance (if there are instance methods representing routes)
      */
-    public void addRoutes(Class<?> c, Object o) {
-        Router.addRoutes(c, o, router);
+    public void accept(Object o) {
+        Router.addRoutes(o, router);
     }
 }
