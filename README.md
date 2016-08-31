@@ -4,16 +4,14 @@ Java http server and web application framework.
 ## Example
 
 ```java
-    HttpServer server = new HttpSocketServer(8080);
-    server.accept(new Controller() {
-        @Route("/?id={[0-9]+}")
-        public Response id(int id) {
-            return ok("<title>HTTP Test</title><p>Id: " + id + "</p>");
+    HttpServer server = HttpServer.bind(8080);
+    server.accept(Controller.class);
+    server.listen();
+    ...    
+    public static class Controller {
+        @Get("/")
+        public static HttpHandler index() {
+            return Response.code(ResponseCode.OK);
         }
-    });
-```
-
-```java
-    HttpServer server = new HttpSocketServer(8080);
-    server.accept(new RoutingTable(Request.GET, "/", ok("<title>HTTP Test</title><p>Test</p>")));
+    }
 ```
