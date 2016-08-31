@@ -8,7 +8,7 @@ Java http server and web application framework.
     server.accept(new Controller() {
         @Get("/")
         public HttpHandler index() {
-            return code(ResponseCode.OK);
+            return ok();
         }
     });
     server.listen();

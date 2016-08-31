@@ -1,7 +1,7 @@
 package com.iancaffey.http.routes;
 
-import com.iancaffey.http.HttpServer;
 import com.iancaffey.http.HttpHandler;
+import com.iancaffey.http.HttpServer;
 import com.iancaffey.http.util.RoutePath;
 import com.iancaffey.http.util.RoutingException;
 

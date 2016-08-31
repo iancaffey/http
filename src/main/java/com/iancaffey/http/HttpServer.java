@@ -13,7 +13,6 @@ import java.net.ServerSocket;
  * @since 1.0
  */
 public class HttpServer extends Server {
-    private final Router router;
     /**
      * HTTP request type for "GET". Requests data from a specified resource.
      */
@@ -54,14 +53,15 @@ public class HttpServer extends Server {
      * Response header "Server".
      */
     public static final String SERVER = "Server";
-
-    public static HttpServer bind(int port) throws IOException {
-        return new HttpServer(new SocketExchangeFactory(new ServerSocket(port)), new Router());
-    }
+    private final Router router;
 
     private HttpServer(ExchangeFactory factory, Router router) {
         super(factory, new HttpExchangeHandler(router));
         this.router = router;
+    }
+
+    public static HttpServer bind(int port) throws IOException {
+        return new HttpServer(new SocketExchangeFactory(new ServerSocket(port)), new Router());
     }
 
     /**
