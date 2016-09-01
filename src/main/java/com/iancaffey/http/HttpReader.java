@@ -17,6 +17,18 @@ import java.util.Map;
  * @since 1.0
  */
 public class HttpReader {
+    /**
+     * HTTP request type for "GET". Requests data from a specified resource.
+     */
+    public static final String GET = "GET";
+    /**
+     * HTTP request type for "POST". Submits data to be processed to a specified resource.
+     */
+    public static final String POST = "POST";
+    /**
+     * HTTP request type for "DELETE". Deletes the specified resource.
+     */
+    public static final String DELETE = "DELETE";
     private final InputStream in;
     private final BufferedReader reader;
     private ReadState state;

@@ -14,46 +14,12 @@ import java.net.ServerSocket;
  * @since 1.0
  */
 public class HttpServer extends Server {
-    /**
-     * HTTP request type for "GET". Requests data from a specified resource.
-     */
-    public static final String GET = "GET";
-    /**
-     * HTTP request type for "POST". Submits data to be processed to a specified resource.
-     */
-    public static final String POST = "POST";
-    /**
-     * HTTP request type for "DELETE". Deletes the specified resource.
-     */
-    public static final String DELETE = "DELETE";
+
     /**
      * Default HTTP version used when creating HTTP messages.
      */
     public static final String VERSION = "HTTP/1.1";
-    /**
-     * Response header "Content-Length".
-     */
-    public static final String CONTENT_LENGTH = "Content-Length";
-    /**
-     * Response header "Content-Type".
-     */
-    public static final String CONTENT_TYPE = "Content-Type";
-    /**
-     * Response header "Date".
-     */
-    public static final String DATE = "Date";
-    /**
-     * Response header "Expires".
-     */
-    public static final String EXPIRES = "Expires";
-    /**
-     * Response header "Last-modified".
-     */
-    public static final String LAST_MODIFIED = "Last-modified";
-    /**
-     * Response header "Server".
-     */
-    public static final String SERVER = "Server";
+
     private final Router router;
 
     private HttpServer(ExchangeFactory factory, Router router) {

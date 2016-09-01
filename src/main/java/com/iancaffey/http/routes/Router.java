@@ -2,7 +2,6 @@ package com.iancaffey.http.routes;
 
 import com.iancaffey.http.HttpHandler;
 import com.iancaffey.http.HttpReader;
-import com.iancaffey.http.HttpServer;
 import com.iancaffey.http.HttpWriter;
 import com.iancaffey.http.util.RoutePath;
 import com.iancaffey.http.util.RoutingException;
@@ -126,19 +125,19 @@ public class Router implements HttpHandler {
                 int[] indexes;
                 if (method.isAnnotationPresent(Get.class)) {
                     Get get = method.getAnnotation(Get.class);
-                    requestType = HttpServer.GET;
+                    requestType = HttpReader.GET;
                     path = get.value();
                     patterns = get.patterns();
                     indexes = get.indexes();
                 } else if (method.isAnnotationPresent(Post.class)) {
                     Post post = method.getAnnotation(Post.class);
-                    requestType = HttpServer.POST;
+                    requestType = HttpReader.POST;
                     path = post.value();
                     patterns = post.patterns();
                     indexes = post.indexes();
                 } else if (method.isAnnotationPresent(Delete.class)) {
                     Delete delete = method.getAnnotation(Delete.class);
-                    requestType = HttpServer.DELETE;
+                    requestType = HttpReader.DELETE;
                     path = delete.value();
                     patterns = delete.patterns();
                     indexes = delete.indexes();

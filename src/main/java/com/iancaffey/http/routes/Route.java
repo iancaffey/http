@@ -1,7 +1,7 @@
 package com.iancaffey.http.routes;
 
 import com.iancaffey.http.HttpHandler;
-import com.iancaffey.http.HttpServer;
+import com.iancaffey.http.HttpReader;
 import com.iancaffey.http.util.RoutePath;
 import com.iancaffey.http.util.RoutingException;
 
@@ -52,15 +52,15 @@ public class Route {
     }
 
     public static Route get(String path) {
-        return new Route(HttpServer.GET, path);
+        return new Route(HttpReader.GET, path);
     }
 
     public static Route post(String path) {
-        return new Route(HttpServer.POST, path);
+        return new Route(HttpReader.POST, path);
     }
 
     public static Route delete(String path) {
-        return new Route(HttpServer.DELETE, path);
+        return new Route(HttpReader.DELETE, path);
     }
 
     public String requestType() {

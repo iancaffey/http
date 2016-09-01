@@ -1,9 +1,8 @@
 package com.iancaffey.http;
 
-import com.iancaffey.http.routes.Controller;
 import com.iancaffey.http.util.MalformedRequestException;
-import com.iancaffey.http.util.ResponseCode;
 import com.iancaffey.http.util.RoutingException;
+import com.iancaffey.http.util.Status;
 
 import java.io.IOException;
 
@@ -29,12 +28,12 @@ public class HttpExchangeHandler implements ExchangeHandler {
         try {
             handler.accept(reader, writer);
         } catch (MalformedRequestException e) {
-            Controller.code(ResponseCode.BAD_REQUEST).accept(reader, writer);
+            Status.badRequest().accept(reader, writer);
         } catch (RoutingException e) {
-            Controller.code(ResponseCode.NOT_FOUND).accept(reader, writer);
+            Status.notFound().accept(reader, writer);
         } catch (Exception e) {
             e.printStackTrace();
-            Controller.code(ResponseCode.INTERNAL_SERVER_ERROR).accept(reader, writer);
+            Status.internalServerError().accept(reader, writer);
         }
     }
 }

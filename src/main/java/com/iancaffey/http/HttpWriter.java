@@ -19,6 +19,31 @@ import java.time.format.DateTimeFormatter;
  */
 public class HttpWriter extends BufferedWriter {
     /**
+     * Response header "Content-Length".
+     */
+    public static final String CONTENT_LENGTH = "Content-Length";
+    /**
+     * Response header "Content-Type".
+     */
+    public static final String CONTENT_TYPE = "Content-Type";
+    /**
+     * Response header "Date".
+     */
+    public static final String DATE = "Date";
+    /**
+     * Response header "Expires".
+     */
+    public static final String EXPIRES = "Expires";
+    /**
+     * Response header "Last-modified".
+     */
+    public static final String LAST_MODIFIED = "Last-modified";
+    /**
+     * Response header "Server".
+     */
+    public static final String SERVER = "Server";
+
+    /**
      * Constructs a new {@code HttpWriter} for the output stream.
      *
      * @param out the output stream
@@ -34,7 +59,7 @@ public class HttpWriter extends BufferedWriter {
      * @throws IOException indicating an error occurred while writing out to the output stream
      */
     public void writeContentLength(long length) throws IOException {
-        writeHeader(HttpServer.CONTENT_LENGTH, length);
+        writeHeader(HttpWriter.CONTENT_LENGTH, length);
     }
 
     /**
@@ -44,7 +69,7 @@ public class HttpWriter extends BufferedWriter {
      * @throws IOException indicating an error occurred while writing out to the output stream
      */
     public void writeContentType(String type) throws IOException {
-        writeHeader(HttpServer.CONTENT_TYPE, type);
+        writeHeader(HttpWriter.CONTENT_TYPE, type);
     }
 
     /**
@@ -56,7 +81,7 @@ public class HttpWriter extends BufferedWriter {
      * @throws IOException indicating an error occurred while writing out to the output stream
      */
     public void writeDate(Instant instant) throws IOException {
-        writeHeader(HttpServer.DATE, instant == null ? null :
+        writeHeader(HttpWriter.DATE, instant == null ? null :
                 DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
     }
 
@@ -69,7 +94,7 @@ public class HttpWriter extends BufferedWriter {
      * @throws IOException indicating an error occurred while writing out to the output stream
      */
     public void writeExpiration(Instant instant) throws IOException {
-        writeHeader(HttpServer.EXPIRES, instant == null ? "Never" :
+        writeHeader(HttpWriter.EXPIRES, instant == null ? "Never" :
                 DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
     }
 
@@ -82,7 +107,7 @@ public class HttpWriter extends BufferedWriter {
      * @throws IOException indicating an error occurred while writing out to the output stream
      */
     public void writeLastModified(Instant instant) throws IOException {
-        writeHeader(HttpServer.LAST_MODIFIED, instant == null ? "Never" :
+        writeHeader(HttpWriter.LAST_MODIFIED, instant == null ? "Never" :
                 DateTimeFormatter.RFC_1123_DATE_TIME.format(ZonedDateTime.ofInstant(instant, ZoneId.of("GMT"))));
     }
 
@@ -93,7 +118,7 @@ public class HttpWriter extends BufferedWriter {
      * @throws IOException indicating an error occurred while writing out to the output stream
      */
     public void writeServer(String server) throws IOException {
-        writeHeader(HttpServer.SERVER, server);
+        writeHeader(HttpWriter.SERVER, server);
     }
 
     /**
