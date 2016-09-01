@@ -32,21 +32,20 @@ public class Router implements HttpHandler {
      * <p>
      * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
      * <p>
-     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
-     * have access to the incoming request and generate dynamic content.
+     * The method return type must be a {@code HttpHandler}.
      * <p>
      * Each class is restricted to containing static routes.
      * <p>
-     * Use {@code Router.asRouter(Object...)} for already instantiated controllers.
+     * Use {@code Router.asRouter(Controller...)} for already instantiated controllers.
      *
      * @param classes the classes containing annotated route methods
      * @return a new {@code Router}
      */
-    public static Router asRouter(Class<?>... classes) {
+    public static Router asRouter(Class<? extends Controller>... classes) {
         if (classes == null)
             throw new IllegalArgumentException();
         Router router = new Router();
-        for (Class<?> c : classes)
+        for (Class<? extends Controller> c : classes)
             Router.addRoutes(c, router);
         return router;
     }
@@ -56,18 +55,17 @@ public class Router implements HttpHandler {
      * <p>
      * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
      * <p>
-     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
-     * have access to the incoming request and generate dynamic content.
+     * The method return type must be a {@code HttpHandler}.
      *
-     * @param objects the objects containing annotated route methods
+     * @param controllers the controllers containing annotated route methods
      * @return a new {@code Router}
      */
-    public static Router asRouter(Object... objects) {
-        if (objects == null)
+    public static Router asRouter(Controller... controllers) {
+        if (controllers == null)
             throw new IllegalArgumentException();
         Router router = new Router();
-        for (Object o : objects)
-            Router.addRoutes(o.getClass(), o, router);
+        for (Controller controller : controllers)
+            Router.addRoutes(controller.getClass(), controller, router);
         return router;
     }
 
@@ -76,17 +74,16 @@ public class Router implements HttpHandler {
      * <p>
      * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
      * <p>
-     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
-     * have access to the incoming request and generate dynamic content.
+     * The method return type must be a {@code HttpHandler}.
      * <p>
      * Each class is restricted to containing static routes.
      * <p>
-     * Use {@code Router.addRoutes(Class, Object, Router)} for already instantiated controllers.
+     * Use {@code Router.addRoutes(Controller, Router)} for already instantiated controllers.
      *
      * @param c      the controller class
      * @param router the target router
      */
-    public static void addRoutes(Class<?> c, Router router) {
+    public static void addRoutes(Class<? extends Controller> c, Router router) {
         Router.addRoutes(c, null, router);
     }
 
@@ -95,16 +92,15 @@ public class Router implements HttpHandler {
      * <p>
      * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
      * <p>
-     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
-     * have access to the incoming request and generate dynamic content.
+     * The method return type must be a {@code HttpHandler}.
      *
-     * @param o      the controller instance (if there are instance methods representing routes)
-     * @param router the target router
+     * @param controller the controller instance (if there are instance methods representing routes)
+     * @param router     the target router
      */
-    public static void addRoutes(Object o, Router router) {
-        if (o == null)
+    public static void addRoutes(Controller controller, Router router) {
+        if (controller == null)
             throw new IllegalArgumentException();
-        Router.addRoutes(o.getClass(), o, router);
+        Router.addRoutes(controller.getClass(), controller, router);
     }
 
     /**
@@ -112,16 +108,16 @@ public class Router implements HttpHandler {
      * <p>
      * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
      * <p>
-     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
-     * have access to the incoming request and generate dynamic content.
+     * The method return type must be a {@code HttpHandler}.
      *
-     * @param c      the controller class
-     * @param o      the controller instance (if there are instance methods representing routes)
-     * @param router the target router
+     * @param controllerClass the controller class
+     * @param controller      the controller instance (if there are instance methods representing routes)
+     * @param router          the target router
      */
-    public static void addRoutes(Class<?> c, Object o, Router router) {
-        if (c == null || router == null)
+    private static void addRoutes(Class<? extends Controller> controllerClass, Controller controller, Router router) {
+        if (controllerClass == null || router == null)
             throw new IllegalArgumentException();
+        Class c = controllerClass;
         do {
             Stream.concat(Arrays.stream(c.getMethods()), Arrays.stream(c.getDeclaredMethods())).forEach(method -> {
                 String requestType;
@@ -160,9 +156,9 @@ public class Router implements HttpHandler {
                 for (int i = 0; i < indexes.length; i++)
                     route.where(parameters[i], indexes[i]);
                 boolean isStatic = Modifier.isStatic(method.getModifiers());
-                if (!isStatic && o == null)
+                if (!isStatic && controller == null)
                     throw new IllegalArgumentException("Illegal route. Methods must be declared static for non-instantiated controllers.");
-                route.use(method, isStatic ? null : o);
+                route.use(method, isStatic ? null : controller);
                 router.add(route);
             });
         } while ((c = c.getSuperclass()) != null);

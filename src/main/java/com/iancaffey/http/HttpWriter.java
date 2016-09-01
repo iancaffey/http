@@ -131,7 +131,7 @@ public class HttpWriter extends BufferedWriter {
      * @throws IOException indicating an error occurred while writing out to the output stream
      */
     public void writeHeader(String key, Object value) throws IOException {
-        writeHeader(key + ":" + String.valueOf(value));
+        writeHeader(key, String.valueOf(value));
     }
 
     /**

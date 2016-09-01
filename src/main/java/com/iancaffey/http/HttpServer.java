@@ -1,5 +1,6 @@
 package com.iancaffey.http;
 
+import com.iancaffey.http.routes.Controller;
 import com.iancaffey.http.routes.Route;
 import com.iancaffey.http.routes.Router;
 
@@ -105,17 +106,17 @@ public class HttpServer extends Server {
      * <p>
      * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
      * <p>
-     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
-     * have access to the incoming request and generate dynamic content.
+     * The method return type must be a {@code HttpHandler}.
      * <p>
      * Each class is restricted to containing static routes.
      * <p>
-     * Use {@code accept(Class, Object)} for already instantiated controllers.
+     * Use {@code accept(Controller)} for already instantiated controllers.
      *
      * @param c the controller class
      */
-    public void accept(Class<?> c) {
+    public HttpServer accept(Class<? extends Controller> c) {
         Router.addRoutes(c, router);
+        return this;
     }
 
     /**
@@ -123,12 +124,12 @@ public class HttpServer extends Server {
      * <p>
      * A method subject to becoming a {@code Route} must be annotated with {@code Get}, {@code Post}, or {@code Delete}.
      * <p>
-     * The method return type must be either a {@code Response} for static routes or {@code HttpExchange} for routes that
-     * have access to the incoming request and generate dynamic content.
+     * The method return type must be a {@code HttpHandler}.
      *
-     * @param o the controller instance (if there are instance methods representing routes)
+     * @param controller the controller instance (if there are instance methods representing routes)
      */
-    public void accept(Object o) {
-        Router.addRoutes(o, router);
+    public HttpServer accept(Controller controller) {
+        Router.addRoutes(controller, router);
+        return this;
     }
 }

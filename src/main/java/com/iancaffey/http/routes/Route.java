@@ -23,12 +23,13 @@ import java.util.regex.Pattern;
 public class Route {
     public static final String DEFAULT_PARAMETER_PATTERN = ".+";
     public static final Pattern PARAMETER_PATTERN = Pattern.compile("\\{([A-z]+)}");
-    private final String requestType;
     private final String path;
     private final List<String> parameters = new ArrayList<>();
     private final Map<Integer, String> reverseParameterOrder = new HashMap<>();
     private final Map<String, Integer> parameterOrder = new HashMap<>();
     private final Map<String, String> parameterPatterns = new HashMap<>();
+    private final String requestType;
+    private HttpHandler direct;
     private Method method;
     private Pattern evaluatedPattern;
     private Object parent;
@@ -94,6 +95,11 @@ public class Route {
         return this;
     }
 
+    public Route use(HttpHandler handler) {
+        this.direct = handler;
+        return this;
+    }
+
     public Route use(String methodPath) {
         return use(methodPath, null);
     }
@@ -125,6 +131,8 @@ public class Route {
     }
 
     public Object invoke(String uri) throws InvocationTargetException, IllegalAccessException {
+        if (direct != null)
+            return direct;
         if (method == null)
             throw new RoutingException("No method configured for route. Route#use must be called to assign the method to invoke.");
         method.setAccessible(true);
