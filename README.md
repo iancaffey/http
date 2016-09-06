@@ -3,6 +3,7 @@ Java http server and web application framework.
 
 ## Example
 
+### Basic route
 ```java
     HttpServer server = HttpServer.bind(8080);
     server.accept(new Controller() {
@@ -13,3 +14,16 @@ Java http server and web application framework.
     });
     server.listen();
 ```
+### Parameterized route
+```java
+    HttpServer server = HttpServer.bind(8080);
+    server.accept(new Controller() {
+        @Get("/user/{name}")
+        public HttpHandler index(String username) {
+            return ok();
+        }
+    });
+    server.listen();
+```
+Keep in mind, annotation-based routes can be limiting, as the only supported pattern for parameters is `.+`. 
+Using the Router directly provides full support for custom regex, parameter ordering, and delegation to any instantiated class and its methods.
