@@ -1,4 +1,4 @@
-# http ![](https://img.shields.io/github/license/mashape/apistatus.svg) [![Build Status](https://travis-ci.org/iitc/http.svg?branch=master)](https://travis-ci.org/iitc/http)
+# http ![](https://img.shields.io/github/license/mashape/apistatus.svg) [![Build Status](https://travis-ci.org/iancaffey/http.svg?branch=master)](https://travis-ci.org/iancaffey/http)
 Java http server and web application framework.
 
 ## Example
