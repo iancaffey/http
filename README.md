@@ -18,7 +18,7 @@ Java http server and web application framework.
 ```java
     HttpServer server = HttpServer.bind(8080);
     server.accept(new Controller() {
-        @Get("/user/{name}")
+        @Get("/user/{username}")
         public HttpHandler index(String username) {
             return ok();
         }
