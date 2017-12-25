@@ -28,7 +28,7 @@ public class HttpReader {
      */
     public static final String DELETE = "DELETE";
 	/**
-	 * HTTP request type for "OPTIONS". Deletes the specified resource.
+     * HTTP request type for "OPTIONS". OPTIONS the specified resource.
      */
     public static final String OPTIONS = "OPTIONS";
     private final BufferedReader reader;
