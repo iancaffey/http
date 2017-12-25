@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Get
+ * Options
  *
  * @author zhangj
  * @since 1.0
