@@ -24,8 +24,27 @@ public class Server implements AutoCloseable {
     }
 
     public void listen() throws IOException {
-        while (!isClosed())
-            handler.accept(factory.create());
+        while (!isClosed()){
+			//modify multithreading to avoid single thread blocking
+			//-- START
+			Exchange e = factory.create();
+        	new Thread(){
+				@Override
+				public void run() {
+					try {
+						handler.accept(e);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+        	}.start();
+			//-- END
+			//-- START UPDATE TXT 
+			//handler.accept(factory.create());
+			//-- END
+			
+		}
+        
     }
 
     public boolean isClosed() throws IOException {

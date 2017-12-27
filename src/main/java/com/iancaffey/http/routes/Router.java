@@ -141,6 +141,12 @@ public class Router implements HttpHandler {
                     path = delete.value();
                     patterns = delete.patterns();
                     indexes = delete.indexes();
+                } else if(method.isAnnotationPresent(Options.class)){
+                	Options options = method.getAnnotation(Options.class);
+                    requestType = HttpReader.OPTIONS;
+                    path = options.value();
+                    patterns = options.patterns();
+                    indexes = options.indexes();
                 } else {
                     return;
                 }
